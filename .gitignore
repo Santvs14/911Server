@@ -1,0 +1,47 @@
+build/
+
+# Dependency directories
+node_modules/
+
+.env
+sendgrid.env
+
+# Environment variables
+.env*
+!.env.sample
+
+# Script
+src/scripts/backupMysql.ts
+
+# Storage
+src/storage/backup
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+yarn.lock
+
+# Jest coverage report
+coverage/
+
+# Cypress
+cypress/videos
+cypress/screenshots
+
+# Mac files
+.DS_Store
+
+# NextJS
+/.next/
+/out/
+
+# Config
+config/*
+!config/sample.env
+
+*/**/subscriptions_*.csv
+*/**/subscriptions_*.json
+!*/**/subscriptions_10_08-15.json
