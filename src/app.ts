@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { logger } from './middlewares';
 
 import { config } from './config/environment';
+import User from './services/user';
 
 export const app = express();
 
@@ -45,7 +46,7 @@ app.use((req, res, next) => {
   express.json({ limit: '200mb' })(req, res, next);
 });
 
-app.use('/api', logger, []);
+app.use('/api', logger, [User]);
 
 app.listen(app.get('port'), () => {
   console.log(`🚀 Server ready at http://localhost:${app.get('port')}`);
