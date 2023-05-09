@@ -62,6 +62,8 @@ export const LoginUser = async (req: Request, res: Response) => {
         { returnFields: 'nameRol, idRol' },
       );
 
+      console.log('getRolDefault > ', getRolDefault[0]);
+
       const newUser: User = {
         idCedula,
         idRol: getRolDefault[0].idRol,
@@ -70,10 +72,13 @@ export const LoginUser = async (req: Request, res: Response) => {
         direccion: null,
         fechaNacimiento: null,
         telefono: null,
+        tipoSangre: null,
         email,
         contrasena: await bcryptjs.hash(password, 10),
         created_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
       };
+
+      console.log('data >> ', newUser);
 
       await InsertUserStorage(newUser);
 

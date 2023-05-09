@@ -1,3 +1,5 @@
+type TypeSangre = 'AB+' | 'AB-' | 'A+' | 'A-' | 'B+' | 'B-' | 'O+' | 'O-';
+
 export interface User {
   readonly idCedula: string;
   nombre: string | null;
@@ -8,6 +10,7 @@ export interface User {
   fechaNacimiento: string | null;
   contrasena: string;
   created_at: Date | string;
+  tipoSangre: TypeSangre | null;
   idRol: string;
   nameRol?: string;
 }
