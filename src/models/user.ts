@@ -12,5 +12,10 @@ export interface User {
   created_at: Date | string;
   tipoSangre: TypeSangre | null;
   idRol: string;
+  medicacion: string | null;
+  padecimiento: string | null;
+  pesoCorporal: string | null;
+  genero: string | null;
+  alergias: string | null;
   nameRol?: string;
 }
