@@ -71,55 +71,39 @@ export const RegisterUser = async (req: Request, res: Response) => {
     const user = await getUserStorage({ idCedula });
     if (user.length) throw Error('Este usuario ya existe, por favor inicie sesión');
 
-    if (!user.length) {
-      getRolDefault = await GetRolesStorage(
-        { nameRol: SelectRol.Cliente },
-        { returnFields: 'nameRol, idRol' },
-      );
+    getRolDefault = await GetRolesStorage(
+      { nameRol: SelectRol.Cliente },
+      { returnFields: 'nameRol, idRol' },
+    );
 
-      const newUser: User = {
-        idCedula,
-        idRol: getRolDefault[0].idRol,
-        nombre,
-        apellido,
-        direccion,
-        fechaNacimiento: format(new Date(fechaNac).getTime(), 'yyyy-MM-dd'),
-        telefono,
-        tipoSangre,
-        email,
-        contrasena: await bcryptjs.hash(password, 10),
-        created_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-        pesoCorporal: peso,
-        medicacion,
-        padecimiento,
-        alergias,
-        genero,
-      };
+    const newUser: User = {
+      idCedula,
+      idRol: getRolDefault[0].idRol,
+      nombre,
+      apellido,
+      direccion,
+      fechaNacimiento: format(new Date(fechaNac).getTime(), 'yyyy-MM-dd'),
+      telefono,
+      tipoSangre,
+      email,
+      contrasena: await bcryptjs.hash(password, 10),
+      created_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+      pesoCorporal: peso,
+      medicacion,
+      padecimiento,
+      alergias,
+      genero,
+    };
 
-      await InsertUserStorage(newUser);
+    await InsertUserStorage(newUser);
 
-      newUser.contrasena = '';
-      const me = {
-        user: newUser,
-        token: GenerateToken({ idCedula: newUser.idCedula }),
-      };
-
-      return res.status(200).json({ me });
+    newUser.contrasena = '';
+    if (newUser.fechaNacimiento) {
+      newUser.fechaNacimiento = format(new Date(newUser.fechaNacimiento).getTime(), 'yyyy-MM-dd');
     }
-
-    // si el usuario ya esta registrado !!!!
-    const ValidatePassword = await bcryptjs.compare(password, user[0].contrasena);
-
-    if (!ValidatePassword) {
-      throw Error('Datos incorrectos, revise e intentelo de nuevo');
-    }
-
-    user[0].nameRol = getRolDefault[0].nameRol;
-    user[0].contrasena = '';
-
     const me = {
-      user: user[0],
-      token: GenerateToken({ idUser: user[0].idCedula }),
+      user: newUser,
+      token: GenerateToken({ idCedula: newUser.idCedula }),
     };
 
     return res.status(200).json({ me });
@@ -150,6 +134,9 @@ export const LoginUser = async (req: Request, res: Response) => {
 
     user[0].nameRol = getRol[0].nameRol;
     user[0].contrasena = '';
+    if (user[0].fechaNacimiento) {
+      user[0].fechaNacimiento = format(new Date(user[0].fechaNacimiento).getTime(), 'yyyy-MM-dd');
+    }
 
     const me = {
       user: user[0],

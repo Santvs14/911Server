@@ -6,6 +6,7 @@ import { logger } from './middlewares';
 
 import { config } from './config/environment';
 import User from './services/user';
+import Report from './services/report';
 
 export const app = express();
 
@@ -46,7 +47,7 @@ app.use((req, res, next) => {
   express.json({ limit: '200mb' })(req, res, next);
 });
 
-app.use('/api', logger, [User]);
+app.use('/api', logger, [User, Report]);
 
 app.listen(app.get('port'), () => {
   console.log(`🚀 Server ready at http://localhost:${app.get('port')}`);

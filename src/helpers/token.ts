@@ -5,7 +5,7 @@ import { User } from '../models/user';
 import { getUserStorage } from '../sql/users/select';
 
 interface TokenInterface {
-  idUser: string;
+  idCedula: string;
 }
 
 const tokenExpiresIn = 720000; // cerca de 8 dias o mas;
@@ -19,7 +19,7 @@ export const VerifyToken = async (options: { token: string; isRefresh?: boolean 
     async (err: TokenExpiredError, decoded: TokenInterface) => {
       if (err) throw Error(err.message);
 
-      const user = await getUserStorage({ idCedula: decoded.idUser });
+      const user = await getUserStorage({ idCedula: decoded.idCedula });
       if (!user.length) throw new Error('No existe el usuario');
 
       return user[0] as User;
