@@ -90,7 +90,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
       nombre: nombre || null,
       apellido: apellido || null,
       direccion: direccion || null,
-      fechaNacimiento: format(new Date(fechaNac).getTime(), 'yyyy-MM-dd'),
+      fechaNacimiento: fechaNac ? format(new Date(fechaNac).getTime(), 'yyyy-MM-dd') : null,
       telefono: telefono || null,
       tipoSangre: tipoSangre || null,
       email,
