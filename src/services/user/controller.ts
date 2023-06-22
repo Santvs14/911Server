@@ -9,6 +9,7 @@ import { User } from '../../models/user';
 import { GetRolesStorage } from '../../sql/roles/select';
 import { getUserStorage } from '../../sql/users/select';
 import { InsertUserStorage } from '../../sql/users/insert';
+import { HOST_ADMIN } from '../../util/url';
 
 export const getHello = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'getHello' });
@@ -71,28 +72,35 @@ export const RegisterUser = async (req: Request, res: Response) => {
     const user = await getUserStorage({ idCedula });
     if (user.length) throw Error('Este usuario ya existe, por favor inicie sesión');
 
-    getRolDefault = await GetRolesStorage(
-      { nameRol: SelectRol.Cliente },
-      { returnFields: 'nameRol, idRol' },
-    );
+    if (HOST_ADMIN.find(h => h === req.get('origin'))) {
+      getRolDefault = await GetRolesStorage(
+        { nameRol: SelectRol.Operador },
+        { returnFields: 'nameRol, idRol' },
+      );
+    } else {
+      getRolDefault = await GetRolesStorage(
+        { nameRol: SelectRol.Cliente },
+        { returnFields: 'nameRol, idRol' },
+      );
+    }
 
     const newUser: User = {
       idCedula,
       idRol: getRolDefault[0].idRol,
-      nombre,
-      apellido,
-      direccion,
+      nombre: nombre || null,
+      apellido: apellido || null,
+      direccion: direccion || null,
       fechaNacimiento: format(new Date(fechaNac).getTime(), 'yyyy-MM-dd'),
-      telefono,
-      tipoSangre,
+      telefono: telefono || null,
+      tipoSangre: tipoSangre || null,
       email,
       contrasena: await bcryptjs.hash(password, 10),
       created_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
-      pesoCorporal: peso,
-      medicacion,
-      padecimiento,
-      alergias,
-      genero,
+      pesoCorporal: peso || null,
+      medicacion: medicacion || null,
+      padecimiento: padecimiento || null,
+      alergias: alergias || null,
+      genero: genero || null,
     };
 
     await InsertUserStorage(newUser);

@@ -7,12 +7,13 @@ import { logger } from './middlewares';
 import { config } from './config/environment';
 import User from './services/user';
 import Report from './services/report';
+import { HOST_ADMIN } from './util/url';
 
 export const app = express();
 
 app.use(
   cors({
-    origin: ['http://localhost:3000'],
+    origin: HOST_ADMIN,
   }),
 );
 
