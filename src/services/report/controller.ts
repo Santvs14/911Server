@@ -17,6 +17,7 @@ export const getReports = async (req: Request, res: Response) => {
 
   try {
     const me = req.user;
+    const onlyMe = req.query.onlyMe as string;
     const getRol = await GetRolesStorage({ idRol: me.idRol });
     if (!getRol.length) throw Error('No se encontro rol asignado');
 
@@ -27,7 +28,7 @@ export const getReports = async (req: Request, res: Response) => {
       idCliente = me.idCedula;
     }
 
-    if (getRol[0].nameRol === SelectRol.Operador) {
+    if (getRol[0].nameRol === SelectRol.Operador && onlyMe) {
       idOperador = me.idCedula;
     }
 
