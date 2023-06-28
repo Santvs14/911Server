@@ -18,7 +18,7 @@ export const getReports = async (req: Request, res: Response) => {
   req.logger.info({ status: 'start' });
 
   try {
-    /*const me = req.user;
+    const me = req.user;
     const onlyMe = req.query.onlyMe as string;
     const getRol = await GetRolesStorage({ idRol: me.idRol });
     if (!getRol.length) throw Error('No se encontro rol asignado');
@@ -32,7 +32,7 @@ export const getReports = async (req: Request, res: Response) => {
 
     if (getRol[0].nameRol === SelectRol.Operador && onlyMe) {
       idOperador = me.idCedula;
-    }*/
+    }
 
     const page = (req.query.page as string) || '1';
     const tipo = (req.query.tipo as TypeReport) || '';
@@ -45,7 +45,7 @@ export const getReports = async (req: Request, res: Response) => {
     const dataByPage = 20;
 
     count = (await getReportsStorage(
-      { tipo, estado, idCliente: '', idOperador: '' },
+      { tipo, estado, idCliente, idOperador },
       { isCount: true, find },
     )) as Count;
 
@@ -61,7 +61,7 @@ export const getReports = async (req: Request, res: Response) => {
     }
 
     const getDataReports = (await getReportsStorage(
-      { tipo, estado, idCliente: '', idOperador: '' },
+      { tipo, estado, idCliente, idOperador },
       { start, dataByPage, find },
     )) as Report[];
 
