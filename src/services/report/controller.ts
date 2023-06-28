@@ -196,3 +196,30 @@ export const assignOperatorReport = async (req: Request, res: Response) => {
     return res.status(500).json({ status: error.message });
   }
 };
+
+export const cancelOperatorReport = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'reports', serviceHandler: 'cancelOperatorReport' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const { idReporte } = req.body;
+    const me = req.user;
+    const getRol = await GetRolesStorage({ idRol: me.idRol });
+
+    if (!getRol.length) throw Error('No se encontro rol asignado');
+    if (getRol[0].nameRol !== SelectRol.Operador) {
+      throw Error('No eres un operador para atender este reporte');
+    }
+
+    const getReport = (await getReportsStorage({ idReporte })) as Report[];
+    if (!getReport.length) throw Error('No se encontro el reporte');
+    if (!getReport[0].idOperador) throw Error('No existe un operador en este reporte');
+
+    await UpdateReportStorage({ idReporte, idOperador: null });
+
+    return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};

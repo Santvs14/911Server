@@ -28,6 +28,7 @@ export const UpdateReportStorage = async (options: Partial<Report>) => {
   if (idCliente) SET.push(`idCliente = '${idCliente}'`);
   if (idDepartamento) SET.push(`idDepartamento = '${idDepartamento}'`);
   if (idOperador) SET.push(`idOperador = '${idOperador}'`);
+  if (idOperador === null) SET.push(`idOperador = NULL`);
   if (estado) SET.push(`estado = '${estado}'`);
   if (tipo) SET.push(`tipo = '${tipo}'`);
 
