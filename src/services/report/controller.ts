@@ -10,13 +10,15 @@ import { getReportsStorage } from '../../sql/reports/select';
 import { Count } from '../../models/util';
 import { GetRolesStorage } from '../../sql/roles/select';
 import { SelectRol } from '../../models/rol';
+import { UpdateReportStorage } from '../../sql/reports/update';
+import { getUserStorage } from '../../sql/users/select';
 
 export const getReports = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'reports', serviceHandler: 'getReports' });
   req.logger.info({ status: 'start' });
 
   try {
-    const me = req.user;
+    /*const me = req.user;
     const onlyMe = req.query.onlyMe as string;
     const getRol = await GetRolesStorage({ idRol: me.idRol });
     if (!getRol.length) throw Error('No se encontro rol asignado');
@@ -30,7 +32,7 @@ export const getReports = async (req: Request, res: Response) => {
 
     if (getRol[0].nameRol === SelectRol.Operador && onlyMe) {
       idOperador = me.idCedula;
-    }
+    }*/
 
     const page = (req.query.page as string) || '1';
     const tipo = (req.query.tipo as TypeReport) || '';
@@ -43,7 +45,7 @@ export const getReports = async (req: Request, res: Response) => {
     const dataByPage = 20;
 
     count = (await getReportsStorage(
-      { tipo, estado, idCliente, idOperador },
+      { tipo, estado, idCliente: '', idOperador: '' },
       { isCount: true, find },
     )) as Count;
 
@@ -58,9 +60,29 @@ export const getReports = async (req: Request, res: Response) => {
       }
     }
 
-    const reports = await getReportsStorage(
-      { tipo, estado, idCliente, idOperador },
+    const getDataReports = (await getReportsStorage(
+      { tipo, estado, idCliente: '', idOperador: '' },
       { start, dataByPage, find },
+    )) as Report[];
+
+    const reports = await Promise.all(
+      getDataReports.map(async report => {
+        if (report.idOperador) {
+          const getOperator = await getUserStorage(
+            { idCedula: report.idOperador },
+            { returnFields: 'idCedula, nombre, apellido, email' },
+          );
+
+          return {
+            operador: { ...getOperator[0] },
+            ...report,
+          };
+        }
+
+        return {
+          ...report,
+        };
+      }),
     );
 
     return res.status(200).json({ pages, count, reports });
@@ -106,6 +128,68 @@ export const newReport = async (req: Request, res: Response) => {
     };
 
     await InsertReportStorage(data);
+    return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const admitOperatorReport = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'reports', serviceHandler: 'admitOperatorReport' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const { idReporte } = req.body;
+    const me = req.user;
+    const getRol = await GetRolesStorage({ idRol: me.idRol });
+
+    if (!getRol.length) throw Error('No se encontro rol asignado');
+    if (getRol[0].nameRol !== SelectRol.Operador) {
+      throw Error('No eres un operador para atender este reporte');
+    }
+
+    const getReport = (await getReportsStorage({ idReporte })) as Report[];
+    if (!getReport.length) throw Error('No se encontro el reporte');
+    if (getReport[0].idOperador) throw Error('Ya existe un operador en este reporte');
+
+    await UpdateReportStorage({ idReporte, idOperador: me.idCedula });
+
+    return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const assignOperatorReport = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'reports', serviceHandler: 'assignOperatorReport' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const { idReporte, idOperador } = req.body;
+    const me = req.user;
+    const getRolOperador = await GetRolesStorage({ nameRol: SelectRol.Operador });
+
+    if (!getRolOperador.length) throw Error('No se encontro rol asignado');
+    if (getRolOperador[0].idRol !== me.idRol) {
+      throw Error('No eres un operador para atender este reporte');
+    }
+
+    // valid operador assign
+    const getUserAssing = await getUserStorage({ idCedula: idOperador });
+
+    if (!getUserAssing.length) throw Error('No se encontro el operador ha asignar');
+    if (getRolOperador[0].idRol !== getUserAssing[0].idRol) {
+      throw Error('No eres un operador para atender este reporte');
+    }
+
+    const getReport = (await getReportsStorage({ idReporte })) as Report[];
+    if (!getReport.length) throw Error('No se encontro el reporte');
+    if (getReport[0].idOperador) throw Error('Ya existe un operador en este reporte');
+
+    await UpdateReportStorage({ idReporte, idOperador });
+
     return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
