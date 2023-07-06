@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 import { InsertReportStorage } from '../../sql/reports/insert';
 import { Report, StatusReport, TypeReport } from '../../models/report';
 import { v4 as uuidv4 } from 'uuid';
+import { v2 as cloudinary } from 'cloudinary';
 import { VerifyToken } from '../../helpers/token';
 import { format } from 'date-fns';
 import { CountPagination } from '../../helpers/numbers';
@@ -97,7 +98,7 @@ export const newReport = async (req: Request, res: Response) => {
   req.logger.info({ status: 'start' });
 
   try {
-    const { naturaleza, sintomas, longitud, latitud, evidencia } = req.body;
+    const { naturaleza, sintomas, longitud, latitud, evidenciaBase64 } = req.body;
     const tipo = req.body.tipo as TypeReport;
 
     if (!['SILENCIOSO', 'COMPLETO'].includes(tipo)) {
@@ -112,6 +113,8 @@ export const newReport = async (req: Request, res: Response) => {
       if (user) idCliente = user.idCedula;
     }
 
+    const upload = await cloudinary.uploader.upload(evidenciaBase64);
+
     const data: Report = {
       idReporte: uuidv4(),
       naturaleza: naturaleza || null,
@@ -119,7 +122,7 @@ export const newReport = async (req: Request, res: Response) => {
       create_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
       longitud,
       latitud,
-      evidencia,
+      evidencia: upload?.url || null,
       idCliente,
       idOperador: null,
       idDepartamento: null,
@@ -128,6 +131,7 @@ export const newReport = async (req: Request, res: Response) => {
     };
 
     await InsertReportStorage(data);
+
     return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
@@ -153,7 +157,7 @@ export const admitOperatorReport = async (req: Request, res: Response) => {
     if (!getReport.length) throw Error('No se encontro el reporte');
     if (getReport[0].idOperador) throw Error('Ya existe un operador en este reporte');
 
-    await UpdateReportStorage({ idReporte, idOperador: me.idCedula });
+    await UpdateReportStorage({ idReporte, idOperador: me.idCedula, estado: 'PROGRESO' });
 
     return res.status(200).json({});
   } catch (error) {
@@ -188,7 +192,7 @@ export const assignOperatorReport = async (req: Request, res: Response) => {
     if (!getReport.length) throw Error('No se encontro el reporte');
     if (getReport[0].idOperador) throw Error('Ya existe un operador en este reporte');
 
-    await UpdateReportStorage({ idReporte, idOperador });
+    await UpdateReportStorage({ idReporte, idOperador, estado: 'PROGRESO' });
 
     return res.status(200).json({});
   } catch (error) {
@@ -215,7 +219,34 @@ export const cancelOperatorReport = async (req: Request, res: Response) => {
     if (!getReport.length) throw Error('No se encontro el reporte');
     if (!getReport[0].idOperador) throw Error('No existe un operador en este reporte');
 
-    await UpdateReportStorage({ idReporte, idOperador: null });
+    await UpdateReportStorage({ idReporte, idOperador: null, estado: 'PENDIENTE' });
+
+    return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const cancelReport = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'reports', serviceHandler: 'cancelReport' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const { idReporte } = req.body;
+    const me = req.user;
+    const getRol = await GetRolesStorage({ idRol: me.idRol });
+
+    if (!getRol.length) throw Error('No se encontro rol asignado');
+    if (getRol[0].nameRol !== SelectRol.Operador) {
+      throw Error('No eres un operador para cancelar este reporte');
+    }
+
+    const getReport = (await getReportsStorage({ idReporte })) as Report[];
+    if (!getReport.length) throw Error('No se encontro el reporte');
+    if (getReport[0].estado === 'CANCELADO') throw Error('Este reporte ya se encuentra cancelado')
+
+    await UpdateReportStorage({ idReporte, estado: 'CANCELADO' });
 
     return res.status(200).json({});
   } catch (error) {

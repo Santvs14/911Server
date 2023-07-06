@@ -20,12 +20,13 @@ export const InsertUserStorage = async (user: User) => {
     pesoCorporal,
     genero,
     alergias,
+    avatar,
   } = user;
 
   try {
     return (await new Promise((resolve, reject) => {
       dataBase.query(
-        `INSERT INTO Usuarios (idCedula, nombre, apellido, telefono, email, direccion, fechaNacimiento, contrasena, tipoSangre, created_at, idRol, medicacion, padecimiento, pesoCorporal, genero, alergias) VALUES ('${idCedula}', ${
+        `INSERT INTO Usuarios (idCedula, nombre, apellido, telefono, email, direccion, fechaNacimiento, contrasena, tipoSangre, created_at, idRol, medicacion, padecimiento, pesoCorporal, genero, alergias, avatar) VALUES ('${idCedula}', ${
           nombre ? `'${nombre}'` : null
         }, ${apellido ? `'${apellido}'` : null}, ${
           telefono ? `'${telefono}'` : null
@@ -37,7 +38,7 @@ export const InsertUserStorage = async (user: User) => {
           padecimiento ? `'${padecimiento}'` : null
         }, ${pesoCorporal ? `'${pesoCorporal}'` : null}, ${genero ? `'${genero}'` : null}, ${
           alergias ? `'${alergias}'` : null
-        })`,
+        }, ${avatar ? `${avatar}` : null})`,
         err => (err ? reject(err) : resolve(idCedula)),
       );
     })) as typeof idCedula;
