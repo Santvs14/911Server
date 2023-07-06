@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import EmailValidator from 'email-validator';
+import { v2 as cloudinary } from 'cloudinary';
 import { format, isDate } from 'date-fns';
 import bcryptjs from 'bcryptjs';
 import Locale from 'date-fns/locale/es';
@@ -152,6 +153,22 @@ export const LoginUser = async (req: Request, res: Response) => {
     };
 
     return res.status(200).json({ me });
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const AvatarUser = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'users', serviceHandler: 'AvatarUser' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const { base64Avatar } = req.body;
+
+    cloudinary.uploader.upload(base64Avatar).then(result=>console.log('result ', result));
+
+    return res.status(200).json();
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });

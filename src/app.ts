@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { logger } from './middlewares';
+import { v2 as cloudinary } from 'cloudinary';
 
 import { config } from './config/environment';
 import User from './services/user';
@@ -26,6 +27,13 @@ app.use(
     message: 'Demasiadas solicitudes a partir de esta IP, inténtalo de nuevo después de 30 minutos',
   }),
 );
+
+cloudinary.config({ 
+  cloud_name: config.CLOUD_NAME,
+  api_key: config.API_KEY, 
+  api_secret: config.API_SERET,
+  secure: true
+});
 
 app.use(function (_req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
