@@ -12,6 +12,8 @@ import { GetRolesStorage } from '../../sql/roles/select';
 import { SelectRol } from '../../models/rol';
 import { UpdateReportStorage } from '../../sql/reports/update';
 import { getUserStorage } from '../../sql/users/select';
+import { Comment } from '../../models/comment';
+import { InsertCommentStorage } from '../../sql/comment/insert';
 
 export const getReports = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'reports', serviceHandler: 'getReports' });
@@ -128,6 +130,34 @@ export const newReport = async (req: Request, res: Response) => {
     };
 
     await InsertReportStorage(data);
+    return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const addCommentReport = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'reports', serviceHandler: 'addCommentReport' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const user = req.user;
+    const idReporte = req.params.idReporte as string;
+    const { comentario } = req.body;
+
+    const getReport = (await getReportsStorage({ idReporte })) as Report[];
+    if (!getReport.length) throw Error('No se encontro el reporte');
+
+    const data: Comment = {
+      idComentario: uuidv4(),
+      create_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+      idEmisor: user.idCedula,
+      comentario,
+      idReporte,
+    };
+
+    await InsertCommentStorage(data);
     return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
