@@ -6,6 +6,8 @@ import {
   assignOperatorReport,
   cancelOperatorReport,
   addCommentReport,
+  commentsReport,
+  getReport,
 } from './controller';
 import { validBodyRequest } from '../../middlewares/validBody';
 import { auth } from '../../middlewares';
@@ -14,6 +16,8 @@ const router = express.Router();
 const baseURL = '/reports';
 
 router.get(`${baseURL}`, auth, getReports);
+router.get(`${baseURL}/:idReporte`, auth, getReport);
+router.get(`${baseURL}/:idReporte/comments`, auth, commentsReport);
 router.post(`${baseURL}/new`, validBodyRequest, newReport);
 router.post(`${baseURL}/:idReporte/addComment`, auth, validBodyRequest, addCommentReport);
 router.put(`${baseURL}/admit`, auth, validBodyRequest, admitOperatorReport);

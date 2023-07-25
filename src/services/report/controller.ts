@@ -14,6 +14,8 @@ import { UpdateReportStorage } from '../../sql/reports/update';
 import { getUserStorage } from '../../sql/users/select';
 import { Comment } from '../../models/comment';
 import { InsertCommentStorage } from '../../sql/comment/insert';
+import { getCommentsReportStorage } from '../../sql/comment/select';
+import { PLACE_HOLDER_AVATAR } from '../../util/url';
 
 export const getReports = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'reports', serviceHandler: 'getReports' });
@@ -131,6 +133,55 @@ export const newReport = async (req: Request, res: Response) => {
 
     await InsertReportStorage(data);
     return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const getReport = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'reports', serviceHandler: 'getReport' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const idReporte = req.params.idReporte as string;
+
+    const getReport = (await getReportsStorage({ idReporte })) as Report[];
+    if (!getReport.length) throw Error('No se encontro el reporte');
+
+    return res.status(200).json({ report: getReport[0] });
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const commentsReport = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'reports', serviceHandler: 'commentsReport' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const idReporte = req.params.idReporte as string;
+
+    const getReport = (await getReportsStorage({ idReporte })) as Report[];
+    if (!getReport.length) throw Error('No se encontro el reporte');
+
+    const getComments = (await getCommentsReportStorage({ idReporte })) as Comment[];
+    const comments = await Promise.all(
+      getComments.map(async com => {
+        const getUser = await getUserStorage({ idCedula: com.idEmisor });
+
+        return {
+          ...com,
+          emisor: {
+            nombre: getUser[0].nombre,
+            avatar: getUser[0].avatar || PLACE_HOLDER_AVATAR,
+          },
+        };
+      }),
+    );
+
+    return res.status(200).json({ comments });
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });

@@ -101,6 +101,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
       padecimiento: padecimiento || null,
       alergias: alergias || null,
       genero: genero || null,
+      avatar: null,
     };
 
     await InsertUserStorage(newUser);
