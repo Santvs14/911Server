@@ -1,3 +1,5 @@
+import { User } from './user';
+
 export type StatusReport = 'PENDIENTE' | 'PROGRESO' | 'COMPLETADO' | 'CANCELADO';
 export type TypeReport = 'SILENCIOSO' | 'COMPLETO';
 
@@ -14,4 +16,6 @@ export interface Report {
   idDepartamento: string | null;
   estado: StatusReport;
   tipo: TypeReport;
+  operador?: Partial<User>;
+  cliente?: Partial<User>;
 }

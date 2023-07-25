@@ -148,8 +148,31 @@ export const getReport = async (req: Request, res: Response) => {
 
     const getReport = (await getReportsStorage({ idReporte })) as Report[];
     if (!getReport.length) throw Error('No se encontro el reporte');
+    let report = getReport[0];
 
-    return res.status(200).json({ report: getReport[0] });
+    if (getReport[0].idOperador) {
+      const getOperador = await getUserStorage({ idCedula: getReport[0].idOperador });
+      report = {
+        ...report,
+        operador: {
+          nombre: getOperador[0].nombre,
+          avatar: getOperador[0].avatar || PLACE_HOLDER_AVATAR,
+        },
+      };
+    }
+
+    if (getReport[0].idCliente) {
+      const getCliente = await getUserStorage({ idCedula: getReport[0].idCliente });
+      report = {
+        ...report,
+        cliente: {
+          nombre: getCliente[0].nombre,
+          avatar: getCliente[0].avatar || PLACE_HOLDER_AVATAR,
+        },
+      };
+    }
+
+    return res.status(200).json({ report });
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });
