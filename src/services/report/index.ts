@@ -8,6 +8,7 @@ import {
   addCommentReport,
   commentsReport,
   getReport,
+  cancelReport,
 } from './controller';
 import { validBodyRequest } from '../../middlewares/validBody';
 import { auth } from '../../middlewares';
@@ -23,5 +24,6 @@ router.post(`${baseURL}/:idReporte/addComment`, auth, validBodyRequest, addComme
 router.put(`${baseURL}/admit`, auth, validBodyRequest, admitOperatorReport);
 router.put(`${baseURL}/assign`, auth, validBodyRequest, assignOperatorReport);
 router.put(`${baseURL}/cancel/operador`, auth, validBodyRequest, cancelOperatorReport);
+router.put(`${baseURL}/cancel`, auth, validBodyRequest, cancelReport);
 
 export default router;

@@ -14,6 +14,10 @@ export const config = envalid.cleanEnv(
     PORT: num(),
     JWT_SECRET: str(),
     JWT_SECRET_REFRESH: str(),
+    API_KEY: str(),
+    API_SERET: str(),
+    CLOUDINARY_URL: str(),
+    CLOUD_NAME: str()
   },
   { strict: true, dotEnvPath: path.resolve(__dirname, '../../../.env') },
 );

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import EmailValidator from 'email-validator';
+import { v2 as cloudinary } from 'cloudinary';
 import { format, isDate } from 'date-fns';
 import bcryptjs from 'bcryptjs';
 import Locale from 'date-fns/locale/es';
@@ -10,6 +11,7 @@ import { GetRolesStorage } from '../../sql/roles/select';
 import { getUserStorage } from '../../sql/users/select';
 import { InsertUserStorage } from '../../sql/users/insert';
 import { HOST_ADMIN } from '../../util/url';
+import { UpdateUserStorage } from '../../sql/users/update';
 
 export const getHello = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'getHello' });
@@ -153,6 +155,42 @@ export const LoginUser = async (req: Request, res: Response) => {
     };
 
     return res.status(200).json({ me });
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const AvatarUser = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'users', serviceHandler: 'AvatarUser' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const me = req.user;
+    const { base64Avatar } = req.body;
+
+    cloudinary.uploader.upload(base64Avatar).then(async result => {
+      await UpdateUserStorage({ idCedula: me.idCedula, avatar: result.url })
+    }).catch(err =>  console.error(err));
+
+    return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const UpdateUser = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'users', serviceHandler: 'UpdateUser' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const me = req.user;
+    const dataUser = req.body;
+
+    await UpdateUserStorage({ idCedula: me.idCedula, ...dataUser })
+
+    return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });
