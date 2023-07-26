@@ -160,6 +160,7 @@ export const getReport = async (req: Request, res: Response) => {
         ...report,
         operador: {
           nombre: getOperador[0].nombre,
+          apellido: getOperador[0].apellido,
           avatar: getOperador[0].avatar || PLACE_HOLDER_AVATAR,
         },
       };
@@ -171,6 +172,7 @@ export const getReport = async (req: Request, res: Response) => {
         ...report,
         cliente: {
           nombre: getCliente[0].nombre,
+          apellido: getCliente[0].apellido,
           avatar: getCliente[0].avatar || PLACE_HOLDER_AVATAR,
         },
       };
@@ -348,7 +350,7 @@ export const cancelReport = async (req: Request, res: Response) => {
 
     const getReport = (await getReportsStorage({ idReporte })) as Report[];
     if (!getReport.length) throw Error('No se encontro el reporte');
-    if (getReport[0].estado === 'CANCELADO') throw Error('Este reporte ya se encuentra cancelado')
+    if (getReport[0].estado === 'CANCELADO') throw Error('Este reporte ya se encuentra cancelado');
 
     await UpdateReportStorage({ idReporte, estado: 'CANCELADO' });
 
