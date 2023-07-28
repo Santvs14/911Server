@@ -238,7 +238,18 @@ export const addCommentReport = async (req: Request, res: Response) => {
     };
 
     await InsertCommentStorage(data);
-    return res.status(200).json({});
+
+    const getUser = await getUserStorage({ idCedula: user.idCedula });
+
+    const dataResponse = {
+      ...data,
+      emisor: {
+        nombre: getUser[0].nombre,
+        avatar: getUser[0].avatar || PLACE_HOLDER_AVATAR,
+      },
+    };
+
+    return res.status(200).json({ comment: dataResponse });
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });
