@@ -121,8 +121,6 @@ export const newReport = async (req: Request, res: Response) => {
       .upload(`data:image/png;base64,${evidenciaBase64}`)
       .catch(err => console.log('img > ', err));
 
-    console.log('evidenciaBase64 > ', evidenciaBase64.slice(0, 10));
-
     const data: Report = {
       idReporte: uuidv4(),
       naturaleza: naturaleza || null,
@@ -137,8 +135,6 @@ export const newReport = async (req: Request, res: Response) => {
       estado: 'PENDIENTE',
       tipo,
     };
-
-    console.log('data > ', data);
 
     await InsertReportStorage(data);
 
