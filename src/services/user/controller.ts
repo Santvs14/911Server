@@ -149,9 +149,11 @@ export const LoginUser = async (req: Request, res: Response) => {
       user[0].fechaNacimiento = format(new Date(user[0].fechaNacimiento).getTime(), 'yyyy-MM-dd');
     }
 
+    console.log('user > ', idCedula, user[0]);
+
     const me = {
       user: user[0],
-      token: GenerateToken({ idUser: user[0].idCedula }),
+      token: GenerateToken({ idCedula: user[0].idCedula }),
     };
 
     return res.status(200).json({ me });
@@ -169,9 +171,12 @@ export const AvatarUser = async (req: Request, res: Response) => {
     const me = req.user;
     const { base64Avatar } = req.body;
 
-    cloudinary.uploader.upload(base64Avatar).then(async result => {
-      await UpdateUserStorage({ idCedula: me.idCedula, avatar: result.url })
-    }).catch(err =>  console.error(err));
+    cloudinary.uploader
+      .upload(base64Avatar)
+      .then(async result => {
+        await UpdateUserStorage({ idCedula: me.idCedula, avatar: result.url });
+      })
+      .catch(err => console.error(err));
 
     return res.status(200).json({});
   } catch (error) {
@@ -188,7 +193,7 @@ export const UpdateUser = async (req: Request, res: Response) => {
     const me = req.user;
     const dataUser = req.body;
 
-    await UpdateUserStorage({ idCedula: me.idCedula, ...dataUser })
+    await UpdateUserStorage({ idCedula: me.idCedula, ...dataUser });
 
     return res.status(200).json({});
   } catch (error) {

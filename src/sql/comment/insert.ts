@@ -11,7 +11,7 @@ export const InsertCommentStorage = async (data: Comment) => {
         `INSERT INTO Comentarios (
             idComentario,
             create_at,
-            commentario,
+            comentario,
             idEmisor,
             idReporte) VALUES ('${idComentario}', '${create_at}', '${comentario}', '${idEmisor}', '${idReporte}')`,
         err => (err ? reject(err) : resolve(idComentario)),

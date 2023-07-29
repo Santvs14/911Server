@@ -117,7 +117,11 @@ export const newReport = async (req: Request, res: Response) => {
       if (user) idCliente = user.idCedula;
     }
 
-    const upload = await cloudinary.uploader.upload(evidenciaBase64);
+    const upload = await cloudinary.uploader
+      .upload(`data:image/png;base64,${evidenciaBase64}`)
+      .catch(err => console.log('img > ', err));
+
+    console.log('evidenciaBase64 > ', evidenciaBase64.slice(0, 10));
 
     const data: Report = {
       idReporte: uuidv4(),
@@ -133,6 +137,8 @@ export const newReport = async (req: Request, res: Response) => {
       estado: 'PENDIENTE',
       tipo,
     };
+
+    console.log('data > ', data);
 
     await InsertReportStorage(data);
 
@@ -238,6 +244,8 @@ export const addCommentReport = async (req: Request, res: Response) => {
     };
 
     await InsertCommentStorage(data);
+
+    console.log('new comment');
 
     const getUser = await getUserStorage({ idCedula: user.idCedula });
 
