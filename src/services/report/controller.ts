@@ -124,6 +124,8 @@ export const newReport = async (req: Request, res: Response) => {
         .catch(err => console.log('img > ', err));
     }
 
+    const getReport = (await getReportsStorage({ idCliente }, { last: true })) as Report[];
+
     const data: Report = {
       idReporte: uuidv4(),
       naturaleza: naturaleza || null,
@@ -137,6 +139,7 @@ export const newReport = async (req: Request, res: Response) => {
       idDepartamento: null,
       estado: 'PENDIENTE',
       tipo,
+      number: getReport[0].number ? getReport[0].number + 1 : 0,
     };
 
     await InsertReportStorage(data);
@@ -233,6 +236,8 @@ export const addCommentReport = async (req: Request, res: Response) => {
 
     const getReport = (await getReportsStorage({ idReporte })) as Report[];
     if (!getReport.length) throw Error('No se encontro el reporte');
+    if (getReport[0].estado === 'FINALIZADO')
+      throw Error('Este reporte ya se encuentra finalizado');
 
     const data: Comment = {
       idComentario: uuidv4(),
@@ -243,8 +248,6 @@ export const addCommentReport = async (req: Request, res: Response) => {
     };
 
     await InsertCommentStorage(data);
-
-    console.log('new comment');
 
     const getUser = await getUserStorage({ idCedula: user.idCedula });
 
@@ -280,6 +283,8 @@ export const admitOperatorReport = async (req: Request, res: Response) => {
     const getReport = (await getReportsStorage({ idReporte })) as Report[];
     if (!getReport.length) throw Error('No se encontro el reporte');
     if (getReport[0].idOperador) throw Error('Ya existe un operador en este reporte');
+    if (getReport[0].estado === 'FINALIZADO')
+      throw Error('Este reporte ya se encuentra finalizado');
 
     await UpdateReportStorage({ idReporte, idOperador: me.idCedula, estado: 'PROGRESO' });
 
@@ -315,6 +320,8 @@ export const assignOperatorReport = async (req: Request, res: Response) => {
     const getReport = (await getReportsStorage({ idReporte })) as Report[];
     if (!getReport.length) throw Error('No se encontro el reporte');
     if (getReport[0].idOperador) throw Error('Ya existe un operador en este reporte');
+    if (getReport[0].estado === 'FINALIZADO')
+      throw Error('Este reporte ya se encuentra finalizado');
 
     await UpdateReportStorage({ idReporte, idOperador, estado: 'PROGRESO' });
 
@@ -342,6 +349,8 @@ export const cancelOperatorReport = async (req: Request, res: Response) => {
     const getReport = (await getReportsStorage({ idReporte })) as Report[];
     if (!getReport.length) throw Error('No se encontro el reporte');
     if (!getReport[0].idOperador) throw Error('No existe un operador en este reporte');
+    if (getReport[0].estado === 'FINALIZADO')
+      throw Error('Este reporte ya se encuentra finalizado');
 
     await UpdateReportStorage({ idReporte, idOperador: null, estado: 'PENDIENTE' });
 
@@ -368,6 +377,8 @@ export const cancelReport = async (req: Request, res: Response) => {
 
     const getReport = (await getReportsStorage({ idReporte })) as Report[];
     if (!getReport.length) throw Error('No se encontro el reporte');
+    if (getReport[0].estado === 'FINALIZADO')
+      throw Error('Este reporte ya se encuentra finalizado');
     if (getReport[0].estado === 'CANCELADO') throw Error('Este reporte ya se encuentra cancelado');
 
     await UpdateReportStorage({ idReporte, estado: 'CANCELADO' });

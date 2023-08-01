@@ -16,6 +16,7 @@ export interface Report {
   idDepartamento: string | null;
   estado: StatusReport;
   tipo: TypeReport;
+  number: number;
   operador?: Partial<User>;
   cliente?: Partial<User>;
 }

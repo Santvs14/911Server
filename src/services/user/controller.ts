@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response } from 'express';
 import EmailValidator from 'email-validator';
 import { v2 as cloudinary } from 'cloudinary';
@@ -12,13 +13,46 @@ import { getUserStorage } from '../../sql/users/select';
 import { InsertUserStorage } from '../../sql/users/insert';
 import { HOST_ADMIN } from '../../util/url';
 import { UpdateUserStorage } from '../../sql/users/update';
+import { getReportsStorage } from '../../sql/reports/select';
+import { Count } from '../../models/util';
 
-export const getHello = async (req: Request, res: Response) => {
+export const getUsers = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'getHello' });
   req.logger.info({ status: 'start' });
 
   try {
-    return res.status(200).json({ saludo: 'Hola, esto es una respuesta desde el servidor' });
+    const find = req.query.find as string;
+    const idRol = req.query.idRol as string;
+
+    const getRol = await GetRolesStorage({ idRol });
+
+    const getUsers = await getUserStorage({ idRol }, { find });
+    const users = await Promise.all(
+      getUsers.map(async user => {
+        let getReportsN = [{ total: 0 }];
+
+        if (getRol[0].nameRol === SelectRol.Operador) {
+          getReportsN = (await getReportsStorage(
+            { idOperador: user.idCedula },
+            { isCount: true },
+          )) as Count;
+        }
+
+        if (getRol[0].nameRol === SelectRol.Cliente) {
+          getReportsN = (await getReportsStorage(
+            { idCliente: user.idCedula },
+            { isCount: true },
+          )) as Count;
+        }
+
+        return {
+          ...user,
+          nReports: getReportsN[0].total,
+        };
+      }),
+    );
+
+    return res.status(200).json({ users });
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });

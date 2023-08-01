@@ -9,19 +9,21 @@ export const getReportsStorage = async (
     returnFields?: string;
     find?: string;
     start?: number;
+    last?: boolean;
     dataByPage?: number;
     isCount?: boolean;
   },
 ) => {
   try {
     const { idReporte, idCliente, idDepartamento, idOperador, tipo, estado } = fields;
-    const { returnFields, find, start, dataByPage, isCount } = options || {};
+    const { returnFields, find, start, last, dataByPage, isCount } = options || {};
 
     let SQL = '';
     let Where = '';
     let Response = '*';
-    const Limit = `LIMIT ${start || 0}, ${dataByPage || 20}`;
+    let Limit = `LIMIT ${start || 0}, ${dataByPage || 20}`;
 
+    if (last) Limit = 'LIMIT 1';
     if (returnFields) Response = returnFields;
 
     if (idReporte) Where = `WHERE idReporte = '${idReporte}'`;

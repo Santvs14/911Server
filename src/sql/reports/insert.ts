@@ -16,6 +16,7 @@ export const InsertReportStorage = async (data: Report) => {
     idDepartamento,
     estado,
     tipo,
+    number,
   } = data;
 
   try {
@@ -32,13 +33,13 @@ export const InsertReportStorage = async (data: Report) => {
             idOperador,
             idDepartamento,
             estado,
-            tipo) VALUES ('${idReporte}', ${naturaleza ? `'${naturaleza}'` : null}, ${
+            tipo, number) VALUES ('${idReporte}', ${naturaleza ? `'${naturaleza}'` : null}, ${
           sintomas ? `'${sintomas}'` : null
         }, '${create_at}', '${longitud}', '${latitud}', ${evidencia ? `'${evidencia}'` : null}, ${
           idCliente ? `'${idCliente}'` : null
         }, ${idOperador ? `'${idOperador}'` : null}, ${
           idDepartamento ? `'${idDepartamento}'` : null
-        }, '${estado}', '${tipo}')`,
+        }, '${estado}', '${tipo}', ${number})`,
         err => (err ? reject(err) : resolve(idReporte)),
       );
     })) as typeof idReporte;
