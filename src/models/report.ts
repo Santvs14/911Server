@@ -1,6 +1,6 @@
 import { User } from './user';
 
-export type StatusReport = 'PENDIENTE' | 'PROGRESO' | 'COMPLETADO' | 'CANCELADO';
+export type StatusReport = 'PENDIENTE' | 'PROGRESO' | 'FINALIZADO' | 'CANCELADO';
 export type TypeReport = 'SILENCIOSO' | 'COMPLETO';
 
 export interface Report {
