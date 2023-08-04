@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from 'express';
 import { InsertReportStorage } from '../../sql/reports/insert';
-import { Report, StatusReport, TypeReport } from '../../models/report';
+import { Report, StatusReport, TypeEmergenci, TypeReport } from '../../models/report';
 import { v4 as uuidv4 } from 'uuid';
 import { v2 as cloudinary } from 'cloudinary';
 import { VerifyToken } from '../../helpers/token';
@@ -104,7 +104,12 @@ export const newReport = async (req: Request, res: Response) => {
   try {
     const { naturaleza, sintomas, longitud, latitud, evidenciaBase64 } = req.body;
     const tipo = req.body.tipo as TypeReport;
+    const tipoEmergencia = req.body.tipoEmergencia as TypeEmergenci;
     let upload = null;
+
+    if (!['BOMBEROS', 'MEDICINA', 'POLICIAS'].includes(tipoEmergencia)) {
+      throw Error('El tipo de emergencia no es valido');
+    }
 
     if (!['SILENCIOSO', 'COMPLETO'].includes(tipo)) {
       throw Error('El tipo de reporte no es valido');
@@ -140,6 +145,7 @@ export const newReport = async (req: Request, res: Response) => {
       estado: 'PENDIENTE',
       tipo,
       number: getReport[0].number ? getReport[0].number + 1 : 0,
+      tipoEmergencia,
     };
 
     await InsertReportStorage(data);

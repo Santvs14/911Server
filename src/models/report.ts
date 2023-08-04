@@ -2,6 +2,7 @@ import { User } from './user';
 
 export type StatusReport = 'PENDIENTE' | 'PROGRESO' | 'FINALIZADO' | 'CANCELADO';
 export type TypeReport = 'SILENCIOSO' | 'COMPLETO';
+export type TypeEmergenci = 'BOMBEROS' | 'MEDICINA' | 'POLICIAS';
 
 export interface Report {
   readonly idReporte: string;
@@ -17,6 +18,7 @@ export interface Report {
   estado: StatusReport;
   tipo: TypeReport;
   number: number;
+  tipoEmergencia: TypeEmergenci;
   operador?: Partial<User>;
   cliente?: Partial<User>;
 }
