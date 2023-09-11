@@ -96,6 +96,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
       password,
       confirmarPass,
       idCedula,
+      avatarBase64,
     } = req.body;
     let getRolDefault: Rol[] = [];
 
@@ -107,6 +108,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
 
     const user = await getUserStorage({ idCedula });
     if (user.length) throw Error('Este usuario ya existe, por favor inicie sesión');
+    if (!avatarBase64) throw Error('La foto de perfil es requerido');
 
     if (HOST_ADMIN.find(h => h === req.get('origin'))) {
       getRolDefault = await GetRolesStorage(
@@ -119,6 +121,10 @@ export const RegisterUser = async (req: Request, res: Response) => {
         { returnFields: 'nameRol, idRol' },
       );
     }
+
+    const upload = await cloudinary.uploader
+      .upload(`data:image/png;base64,${avatarBase64}`)
+      .catch(err => console.log('img > ', err));
 
     const newUser: User = {
       idCedula,
@@ -137,7 +143,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
       padecimiento: padecimiento || null,
       alergias: alergias || null,
       genero: genero || null,
-      avatar: null,
+      avatar: upload?.url || null,
     };
 
     await InsertUserStorage(newUser);

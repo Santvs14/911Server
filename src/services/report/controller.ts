@@ -144,7 +144,7 @@ export const newReport = async (req: Request, res: Response) => {
       idDepartamento: null,
       estado: 'PENDIENTE',
       tipo,
-      number: getReport[0].number ? getReport[0].number + 1 : 0,
+      number: getReport[0].number ? getReport[0].number + 1 : 1,
       tipoEmergencia,
     };
 
