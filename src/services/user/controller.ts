@@ -144,6 +144,8 @@ export const RegisterUser = async (req: Request, res: Response) => {
       alergias: alergias || null,
       genero: genero || null,
       avatar: upload?.url || null,
+      pin: null,
+      v_DosPasos: 0,
     };
 
     await InsertUserStorage(newUser);

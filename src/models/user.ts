@@ -17,6 +17,8 @@ export interface User {
   pesoCorporal: string | null;
   genero: string | null;
   alergias: string | null;
+  pin: string | null;
+  v_DosPasos: number;
   avatar: string | null;
   nameRol?: string;
 }

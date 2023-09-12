@@ -20,6 +20,8 @@ export const UpdateUserStorage = async (options: Partial<User>) => {
     genero,
     alergias,
     avatar,
+    pin,
+    v_DosPasos,
   } = options;
   const SET: string[] = [];
 
@@ -40,6 +42,8 @@ export const UpdateUserStorage = async (options: Partial<User>) => {
   if (genero) SET.push(`genero = '${genero}'`);
   if (alergias) SET.push(`alergias = '${alergias}'`);
   if (avatar) SET.push(`avatar = '${avatar}'`);
+  if (pin) SET.push(`pin = '${pin}'`);
+  if (typeof v_DosPasos === 'number') SET.push(`v_DosPasos = ${v_DosPasos}`);
 
   try {
     return (await new Promise((resolve, reject) => {
