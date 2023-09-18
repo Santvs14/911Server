@@ -8,6 +8,7 @@ import Locale from 'date-fns/locale/es';
 import { GenerateToken } from '../../helpers/token';
 import { Rol, SelectRol } from '../../models/rol';
 import { User } from '../../models/user';
+import { v4 as uuidv4 } from 'uuid';
 import { GetRolesStorage } from '../../sql/roles/select';
 import { getUserStorage } from '../../sql/users/select';
 import { InsertUserStorage } from '../../sql/users/insert';
@@ -15,6 +16,13 @@ import { HOST_ADMIN } from '../../util/url';
 import { UpdateUserStorage } from '../../sql/users/update';
 import { getReportsStorage } from '../../sql/reports/select';
 import { Count } from '../../models/util';
+import { SendEMail } from '../../helpers/email';
+import { config } from '../../config/environment';
+import { CodeAccessTemplate } from '../../util/template/code-access';
+import { randomNumber } from '../../helpers/numbers';
+import { InsertAccessCodeStorage } from '../../sql/accessCode';
+import { GetAccessCodeStorage } from '../../sql/accessCode/select';
+import { UpdateAccessCodeStorage } from '../../sql/accessCode/update';
 
 export const getUsers = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'getHello' });
@@ -191,7 +199,27 @@ export const LoginUser = async (req: Request, res: Response) => {
       user[0].fechaNacimiento = format(new Date(user[0].fechaNacimiento).getTime(), 'yyyy-MM-dd');
     }
 
-    console.log('user > ', idCedula, user[0]);
+    if (user[0].v_DosPasos) {
+      const code = String(randomNumber({ min: 100000, max: 999999 }));
+
+      InsertAccessCodeStorage({
+        idcode: uuidv4(),
+        idCedula: user[0].idCedula,
+        code,
+        create_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+        used: 0,
+      }).then(() => {
+        const msg = {
+          from: config.ROOT_MAIN,
+          to: user[0].email,
+          subject: `Codigo de acceso`,
+          text: '-',
+          html: CodeAccessTemplate({ code }),
+        };
+
+        SendEMail({ data: msg });
+      });
+    }
 
     const me = {
       user: user[0],
@@ -199,6 +227,29 @@ export const LoginUser = async (req: Request, res: Response) => {
     };
 
     return res.status(200).json({ me });
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const ValidAccessCodeUser = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'users', serviceHandler: 'ValidAccessCode' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const me = req.user;
+    const { code } = req.body;
+
+    const getAccessCode = await GetAccessCodeStorage({ code, idCedula: me.idCedula });
+    if (!getAccessCode.length) throw Error('No se encontro el codigo de acceso');
+    if (getAccessCode[0].used) {
+      throw Error('Este codigo de acceso ya fue usado');
+    }
+
+    await UpdateAccessCodeStorage({ idcode: getAccessCode[0].idcode, used: 1 });
+
+    return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });

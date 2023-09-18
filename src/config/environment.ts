@@ -17,7 +17,9 @@ export const config = envalid.cleanEnv(
     API_KEY: str(),
     API_SERET: str(),
     CLOUDINARY_URL: str(),
-    CLOUD_NAME: str()
+    CLOUD_NAME: str(),
+    SENDGRID_API_KEY: str(),
+    ROOT_MAIN: str(),
   },
   { strict: true, dotEnvPath: path.resolve(__dirname, '../../../.env') },
 );

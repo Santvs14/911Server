@@ -1,5 +1,13 @@
 import express from 'express';
-import { RegisterUser, LoginUser, getUsers, getMe, AvatarUser, UpdateUser } from './controller';
+import {
+  RegisterUser,
+  LoginUser,
+  getUsers,
+  getMe,
+  ValidAccessCodeUser,
+  AvatarUser,
+  UpdateUser,
+} from './controller';
 import { auth } from '../../middlewares';
 import { validBodyRequest } from '../../middlewares/validBody';
 
@@ -10,6 +18,7 @@ router.get(`${baseURL}`, auth, getUsers);
 router.get(`${baseURL}/me`, auth, getMe);
 router.post(`${baseURL}/register`, validBodyRequest, RegisterUser);
 router.post(`${baseURL}/login`, validBodyRequest, LoginUser);
+router.post(`${baseURL}/validAccessCode`, auth, validBodyRequest, ValidAccessCodeUser);
 router.put(`${baseURL}/avatar`, auth, validBodyRequest, AvatarUser);
 router.put(`${baseURL}`, auth, validBodyRequest, UpdateUser);
 

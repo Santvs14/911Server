@@ -10,3 +10,8 @@ export const CountPagination = (options: { pagination: number }) => {
 
 export const isEmpty = (value: number | null | undefined) =>
   value !== undefined && value !== null && !isNaN(value);
+
+export const randomNumber = (options: { min: number; max: number }) => {
+  const { min, max } = options;
+  return Math.floor(Math.random() * (max - min + 1) + min);
+};
