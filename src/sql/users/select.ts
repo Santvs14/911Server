@@ -7,7 +7,7 @@ export const getUserStorage = async (
   options?: { returnFields?: string; find?: string; start?: number; dataByPage?: number },
 ) => {
   try {
-    const { idCedula, email } = fields;
+    const { idCedula, idRol, email } = fields;
     const { returnFields, find, start, dataByPage } = options || {};
 
     let Where = '';
@@ -17,9 +17,14 @@ export const getUserStorage = async (
     if (returnFields) Response = returnFields;
 
     if (idCedula) Where = `WHERE idCedula = '${idCedula}'`;
+    if (idRol) Where = `WHERE idRol = '${idRol}'`;
     if (email) Where = `WHERE email = '${email}'`;
-    if (find)
+    if (find && Where) {
+      Where = `${Where} AND (nombre LIKE '%${find}%' OR apellido LIKE '%${find}%' OR email LIKE '%${find}%')`;
+    }
+    if (find && !Where) {
       Where = `WHERE nombre LIKE '%${find}%' OR apellido LIKE '%${find}%' OR email LIKE '%${find}%'`;
+    }
 
     return (await new Promise((resolve, reject) =>
       dataBase.query(

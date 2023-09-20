@@ -14,7 +14,7 @@ import { validBodyRequest } from '../../middlewares/validBody';
 const router = express.Router();
 const baseURL = '/users';
 
-router.get(`${baseURL}`, auth, getUsers);
+router.get(`${baseURL}`, getUsers);
 router.get(`${baseURL}/me`, auth, getMe);
 router.post(`${baseURL}/register`, validBodyRequest, RegisterUser);
 router.post(`${baseURL}/login`, validBodyRequest, LoginUser);
