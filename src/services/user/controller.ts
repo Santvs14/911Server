@@ -6,7 +6,7 @@ import { format, isDate } from 'date-fns';
 import bcryptjs from 'bcryptjs';
 import Locale from 'date-fns/locale/es';
 import { GenerateToken } from '../../helpers/token';
-import { Rol, SelectRol } from '../../models/rol';
+import { NameRol, Rol, SelectRol } from '../../models/rol';
 import { User } from '../../models/user';
 import { v4 as uuidv4 } from 'uuid';
 import { GetRolesStorage } from '../../sql/roles/select';
@@ -30,23 +30,32 @@ export const getUsers = async (req: Request, res: Response) => {
 
   try {
     const find = req.query.find as string;
-    const idRol = req.query.idRol as string;
+    const rolName = req.query.rolName as NameRol;
+    let queryUser = {};
 
-    const getRol = await GetRolesStorage({ idRol });
+    if (rolName && ![SelectRol.Admin, SelectRol.Cliente, SelectRol.Operador].includes(rolName)) {
+      throw Error('Nombre del rol invalido');
+    }
 
-    const getUsers = await getUserStorage({ idRol }, { find });
+    if (rolName) {
+      const getRol = await GetRolesStorage({ nameRol: rolName });
+      if (!getRol.length) throw Error('No se encontraron roles');
+      queryUser = { idRol: getRol[0].idRol };
+    }
+
+    const getUsers = await getUserStorage(queryUser, { find });
     const users = await Promise.all(
       getUsers.map(async user => {
         let getReportsN = [{ total: 0 }];
 
-        if (getRol[0].nameRol === SelectRol.Operador) {
+        if (rolName === SelectRol.Operador) {
           getReportsN = (await getReportsStorage(
             { idOperador: user.idCedula },
             { isCount: true },
           )) as Count;
         }
 
-        if (getRol[0].nameRol === SelectRol.Cliente) {
+        if (rolName === SelectRol.Cliente) {
           getReportsN = (await getReportsStorage(
             { idCliente: user.idCedula },
             { isCount: true },
@@ -60,7 +69,7 @@ export const getUsers = async (req: Request, res: Response) => {
       }),
     );
 
-    return res.status(200).json({ users });
+    return res.status(200).json({ users: users.sort((a, b) => a.nReports - b.nReports) });
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });
