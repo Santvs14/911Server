@@ -20,6 +20,10 @@ export const config = envalid.cleanEnv(
     CLOUD_NAME: str(),
     SENDGRID_API_KEY: str(),
     ROOT_MAIN: str(),
+    PROJECT_ID_FIREBASE: str(),
+    CLIENT_EMAIL_FIREBASE: str(),
+    BUCKET_URL: str(),
+    PRIVATE_KEY_FIREBASE: str(),
   },
   { strict: true, dotEnvPath: path.resolve(__dirname, '../../../.env') },
 );

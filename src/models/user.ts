@@ -19,6 +19,7 @@ export interface User {
   alergias: string | null;
   pin: string | null;
   v_DosPasos: number;
+  token: string;
   avatar: string | null;
   nameRol?: string;
 }

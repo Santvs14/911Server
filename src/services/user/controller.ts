@@ -114,6 +114,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
       confirmarPass,
       idCedula,
       avatarBase64,
+      token,
     } = req.body;
     let getRolDefault: Rol[] = [];
 
@@ -163,6 +164,7 @@ export const RegisterUser = async (req: Request, res: Response) => {
       avatar: upload?.url || null,
       pin: null,
       v_DosPasos: 0,
+      token,
     };
 
     await InsertUserStorage(newUser);

@@ -17,6 +17,7 @@ import { Comment } from '../../models/comment';
 import { InsertCommentStorage } from '../../sql/comment/insert';
 import { getCommentsReportStorage } from '../../sql/comment/select';
 import { PLACE_HOLDER_AVATAR } from '../../util/url';
+import { SendNotification } from '../../helpers/firebase';
 
 export const getReports = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'reports', serviceHandler: 'getReports' });
@@ -265,6 +266,19 @@ export const addCommentReport = async (req: Request, res: Response) => {
       },
     };
 
+    if (getReport[0].idCliente !== user.idCedula) {
+      await SendNotification({
+        token: user.token,
+        notification: {
+          title: `Tu reporte #${getReport[0]?.number || 1} ha sido respondido`,
+          body: `El reporte #${getReport[0]?.number || 1} de ${
+            getReport[0].naturaleza
+          } ha sido respondido`,
+        },
+        data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
+      });
+    }
+
     return res.status(200).json({ comment: dataResponse });
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
@@ -293,6 +307,21 @@ export const admitOperatorReport = async (req: Request, res: Response) => {
       throw Error('Este reporte ya se encuentra finalizado');
 
     await UpdateReportStorage({ idReporte, idOperador: me.idCedula, estado: 'PROGRESO' });
+
+    if (getReport[0].idCliente) {
+      const getUser = await getUserStorage({ idCedula: getReport[0].idCliente });
+
+      await SendNotification({
+        token: getUser[0].token,
+        notification: {
+          title: `Tu reporte #${getReport[0]?.number || 1} ha sido atendido`,
+          body: `El reporte #${getReport[0]?.number || 1} de ${
+            getReport[0].naturaleza
+          } ha sido atendido`,
+        },
+        data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
+      });
+    }
 
     return res.status(200).json({});
   } catch (error) {
@@ -331,6 +360,21 @@ export const assignOperatorReport = async (req: Request, res: Response) => {
 
     await UpdateReportStorage({ idReporte, idOperador, estado: 'PROGRESO' });
 
+    if (getReport[0].idCliente) {
+      const getUser = await getUserStorage({ idCedula: getReport[0].idCliente });
+
+      await SendNotification({
+        token: getUser[0].token,
+        notification: {
+          title: `Tu reporte #${getReport[0]?.number || 1} ha sido atendido`,
+          body: `El reporte #${getReport[0]?.number || 1} de ${
+            getReport[0].naturaleza
+          } ha sido atendido`,
+        },
+        data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
+      });
+    }
+
     return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
@@ -359,6 +403,21 @@ export const cancelOperatorReport = async (req: Request, res: Response) => {
       throw Error('Este reporte ya se encuentra finalizado');
 
     await UpdateReportStorage({ idReporte, idOperador: null, estado: 'PENDIENTE' });
+
+    if (getReport[0].idCliente) {
+      const getUser = await getUserStorage({ idCedula: getReport[0].idCliente });
+
+      await SendNotification({
+        token: getUser[0].token,
+        notification: {
+          title: `El operador ha sido cancelado`,
+          body: `El operadir que gestionaba el reporte #${getReport[0]?.number || 1} de ${
+            getReport[0].naturaleza
+          } ha sido cancelado`,
+        },
+        data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
+      });
+    }
 
     return res.status(200).json({});
   } catch (error) {
@@ -389,6 +448,21 @@ export const cancelReport = async (req: Request, res: Response) => {
 
     await UpdateReportStorage({ idReporte, estado: 'CANCELADO' });
 
+    if (getReport[0].idCliente) {
+      const getUser = await getUserStorage({ idCedula: getReport[0].idCliente });
+
+      await SendNotification({
+        token: getUser[0].token,
+        notification: {
+          title: `Tu reporte #${getReport[0]?.number || 1} ha sido cancelado`,
+          body: `El reporte #${getReport[0]?.number || 1} de ${
+            getReport[0].naturaleza
+          } ha sido cancelado`,
+        },
+        data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
+      });
+    }
+
     return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
@@ -416,6 +490,21 @@ export const finishReport = async (req: Request, res: Response) => {
       throw Error('Este reporte ya se encuentra finalizado');
 
     await UpdateReportStorage({ idReporte, estado: 'FINALIZADO' });
+
+    if (getReport[0].idCliente) {
+      const getUser = await getUserStorage({ idCedula: getReport[0].idCliente });
+
+      await SendNotification({
+        token: getUser[0].token,
+        notification: {
+          title: `Tu reporte #${getReport[0]?.number || 1} ha finalizado`,
+          body: `El reporte #${getReport[0]?.number || 1} de ${
+            getReport[0].naturaleza
+          } ha finalizado`,
+        },
+        data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
+      });
+    }
 
     return res.status(200).json({});
   } catch (error) {
