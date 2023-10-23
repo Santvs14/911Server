@@ -41,9 +41,9 @@ export const InsertUserStorage = async (user: User) => {
           padecimiento ? `'${padecimiento}'` : null
         }, ${pesoCorporal ? `'${pesoCorporal}'` : null}, ${genero ? `'${genero}'` : null}, ${
           alergias ? `'${alergias}'` : null
-        }, ${avatar ? `'${avatar}'` : null}, ${
-          pin ? `'${pin}'` : null
-        }, ${v_DosPasos}, '${token}')`,
+        }, ${avatar ? `'${avatar}'` : null}, ${pin ? `'${pin}'` : null}, ${v_DosPasos}, ${
+          token ? `'${token}'` : null
+        })`,
         err => (err ? reject(err) : resolve(idCedula)),
       );
     })) as typeof idCedula;

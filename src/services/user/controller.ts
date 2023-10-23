@@ -23,6 +23,7 @@ import { randomNumber } from '../../helpers/numbers';
 import { InsertAccessCodeStorage } from '../../sql/accessCode';
 import { GetAccessCodeStorage } from '../../sql/accessCode/select';
 import { UpdateAccessCodeStorage } from '../../sql/accessCode/update';
+import { GeneratePasswordTemplate } from '../../util/template/password-generate';
 
 export const getUsers = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'getHello' });
@@ -84,6 +85,9 @@ export const getMe = async (req: Request, res: Response) => {
     const user = req.user;
     user.contrasena = '';
     user.created_at = format(new Date(user.created_at), 'PPPP', { locale: Locale });
+
+    const getRol = await GetRolesStorage({ idRol: user.idRol });
+    user.nameRol = getRol[0].nameRol;
 
     return res.status(200).json({ me: user });
   } catch (error) {
@@ -179,6 +183,96 @@ export const RegisterUser = async (req: Request, res: Response) => {
     };
 
     return res.status(200).json({ me });
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const addUser = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'users', serviceHandler: 'addUser' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const me = req.user;
+    const {
+      nombre,
+      apellido,
+      genero,
+      telefono,
+      tipoSangre,
+      fechaNac,
+      direccion,
+      peso,
+      alergias,
+      padecimiento,
+      medicacion,
+      email,
+      idCedula,
+      avatarBase64,
+    } = req.body;
+
+    const getRolMe = await GetRolesStorage({ idRol: me.idRol });
+    if (getRolMe[0].nameRol !== SelectRol.Admin) {
+      throw Error('No estas autorizado para esta acción');
+    }
+
+    let upload = null;
+    const password = randomNumber({ min: 100000, max: 999999 }).toString();
+
+    if (!EmailValidator.validate(email)) throw Error(`Dirección de correo invalido`);
+    if (!isDate(new Date(fechaNac))) throw Error('Fecha de nacimiento invalido');
+
+    const user = await getUserStorage({ idCedula });
+    if (user.length) throw Error('Este usuario ya existe');
+
+    const getRolDefault = await GetRolesStorage(
+      { nameRol: SelectRol.Operador },
+      { returnFields: 'nameRol, idRol' },
+    );
+
+    if (avatarBase64) {
+      upload = await cloudinary.uploader
+        .upload(`data:image/png;base64,${avatarBase64}`)
+        .catch(err => console.log('img > ', err));
+    }
+
+    const newUser: User = {
+      idCedula,
+      idRol: getRolDefault[0].idRol,
+      nombre: nombre || null,
+      apellido: apellido || null,
+      direccion: direccion || null,
+      fechaNacimiento: fechaNac ? format(new Date(fechaNac).getTime(), 'yyyy-MM-dd') : null,
+      telefono: telefono || null,
+      tipoSangre: tipoSangre || null,
+      email,
+      contrasena: await bcryptjs.hash(password, 10),
+      created_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
+      pesoCorporal: peso || null,
+      medicacion: medicacion || null,
+      padecimiento: padecimiento || null,
+      alergias: alergias || null,
+      genero: genero || null,
+      avatar: upload?.url || null,
+      pin: null,
+      v_DosPasos: 0,
+      token: null,
+    };
+
+    await InsertUserStorage(newUser).then(() => {
+      const msg = {
+        from: config.ROOT_MAIN,
+        to: email,
+        subject: `Nuevo operador 911`,
+        text: '-',
+        html: GeneratePasswordTemplate({ password }),
+      };
+
+      SendEMail({ data: msg });
+    });
+
+    return res.status(200).json({});
   } catch (error) {
     req.logger.error({ status: 'error', code: 500, error: error.message });
     return res.status(500).json({ status: error.message });
