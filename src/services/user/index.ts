@@ -17,7 +17,7 @@ const baseURL = '/users';
 
 router.get(`${baseURL}`, getUsers);
 router.get(`${baseURL}/me`, auth, getMe);
-router.get(`${baseURL}/add`, auth, validBodyRequest, addUser);
+router.post(`${baseURL}/add`, auth, validBodyRequest, addUser);
 router.post(`${baseURL}/register`, validBodyRequest, RegisterUser);
 router.post(`${baseURL}/login`, validBodyRequest, LoginUser);
 router.post(`${baseURL}/validAccessCode`, auth, validBodyRequest, ValidAccessCodeUser);
