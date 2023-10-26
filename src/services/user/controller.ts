@@ -24,6 +24,7 @@ import { InsertAccessCodeStorage } from '../../sql/accessCode';
 import { GetAccessCodeStorage } from '../../sql/accessCode/select';
 import { UpdateAccessCodeStorage } from '../../sql/accessCode/update';
 import { GeneratePasswordTemplate } from '../../util/template/password-generate';
+import { DeleteUserStorage } from '../../sql/users/delete';
 
 export const getUsers = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'getHello' });
@@ -392,6 +393,22 @@ export const UpdateUser = async (req: Request, res: Response) => {
     const dataUser = req.body;
 
     await UpdateUserStorage({ idCedula: me.idCedula, ...dataUser });
+
+    return res.status(200).json({});
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
+export const DeleteUser = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'users', serviceHandler: 'DeleteUser' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const { idCedula } = req.params;
+
+    await DeleteUserStorage({ idCedula });
 
     return res.status(200).json({});
   } catch (error) {

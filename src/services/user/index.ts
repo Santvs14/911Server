@@ -7,6 +7,7 @@ import {
   getMe,
   ValidAccessCodeUser,
   AvatarUser,
+  DeleteUser,
   UpdateUser,
 } from './controller';
 import { auth } from '../../middlewares';
@@ -23,5 +24,6 @@ router.post(`${baseURL}/login`, validBodyRequest, LoginUser);
 router.post(`${baseURL}/validAccessCode`, auth, validBodyRequest, ValidAccessCodeUser);
 router.put(`${baseURL}/avatar`, auth, validBodyRequest, AvatarUser);
 router.put(`${baseURL}`, auth, validBodyRequest, UpdateUser);
+router.delete(`${baseURL}/:idCedula`, auth, DeleteUser);
 
 export default router;
