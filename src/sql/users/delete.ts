@@ -8,7 +8,7 @@ export const DeleteUserStorage = async (options: { idCedula: string }) => {
 
   try {
     return (await new Promise((resolve, reject) => {
-      dataBase.query(`DELETE Usuarios WHERE idCedula = '${idCedula}';`, err =>
+      dataBase.query(`DELETE FROM Usuarios WHERE idCedula = '${idCedula}';`, err =>
         err ? reject(err) : resolve(idCedula),
       );
     })) as typeof idCedula;
