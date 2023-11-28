@@ -18,6 +18,7 @@ import { InsertCommentStorage } from '../../sql/comment/insert';
 import { getCommentsReportStorage } from '../../sql/comment/select';
 import { PLACE_HOLDER_AVATAR } from '../../util/url';
 import { SendNotification } from '../../helpers/firebase';
+import { isAudio } from '../../helpers/string';
 
 export const getReports = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'reports', serviceHandler: 'getReports' });
@@ -124,7 +125,9 @@ export const newReport = async (req: Request, res: Response) => {
       if (user) idCliente = user.idCedula;
     }
 
-    if (evidenciaBase64) {
+    if (isAudio(evidenciaBase64)) {
+      upload = { url: evidenciaBase64 };
+    } else {
       upload = await cloudinary.uploader
         .upload(`data:image/png;base64,${evidenciaBase64}`)
         .catch(err => console.log('img > ', err));
