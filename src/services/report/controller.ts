@@ -269,17 +269,21 @@ export const addCommentReport = async (req: Request, res: Response) => {
       },
     };
 
-    if (getReport[0].idCliente !== user.idCedula && user?.token) {
-      await SendNotification({
-        token: user.token,
-        notification: {
-          title: `Tu reporte #${getReport[0]?.number || 1} ha sido respondido`,
-          body: `El reporte #${getReport[0]?.number || 1} de ${
-            getReport[0].naturaleza
-          } ha sido respondido`,
-        },
-        data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
-      });
+    if (getReport[0].idCliente !== user.idCedula && getReport[0].idCliente) {
+      const getCliente = await getUserStorage({ idCedula: getReport[0].idCliente });
+
+      if (getCliente[0].token) {
+        await SendNotification({
+          token: getCliente[0].token,
+          notification: {
+            title: `Tu reporte #${getReport[0]?.number || 1} ha sido respondido`,
+            body: `El reporte #${getReport[0]?.number || 1} de ${
+              getReport[0].naturaleza
+            } ha sido respondido`,
+          },
+          data: { router: 'Detalle_Historial', params: getReport[0].idReporte },
+        });
+      }
     }
 
     return res.status(200).json({ comment: dataResponse });
