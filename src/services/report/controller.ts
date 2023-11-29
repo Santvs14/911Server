@@ -104,7 +104,7 @@ export const newReport = async (req: Request, res: Response) => {
   req.logger.info({ status: 'start' });
 
   try {
-    const { naturaleza, sintomas, longitud, latitud, evidenciaBase64 } = req.body;
+    const { type, naturaleza, sintomas, longitud, latitud, evidenciaBase64 } = req.body;
     const tipo = req.body.tipo as TypeReport;
     const tipoEmergencia = req.body.tipoEmergencia as TypeEmergenci;
     let upload = null;
@@ -113,7 +113,7 @@ export const newReport = async (req: Request, res: Response) => {
       throw Error('El tipo de emergencia no es valido');
     }
 
-    if (!['SILENCIOSO', 'COMPLETO'].includes(tipo)) {
+    if (!['SILENCIOSO', 'CIUDADANO', 'SOLIDARIO'].includes(tipo)) {
       throw Error('El tipo de reporte no es valido');
     }
 
@@ -128,8 +128,9 @@ export const newReport = async (req: Request, res: Response) => {
     if (isAudio(evidenciaBase64)) {
       upload = { url: evidenciaBase64 };
     } else {
+      const base = type === 'video' ? 'data:video/mp4;base64' : 'data:image/png;base64';
       upload = await cloudinary.uploader
-        .upload(`data:image/png;base64,${evidenciaBase64}`)
+        .upload(`${base},${evidenciaBase64}`)
         .catch(err => console.log('img > ', err));
     }
 

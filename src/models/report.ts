@@ -1,7 +1,7 @@
 import { User } from './user';
 
 export type StatusReport = 'PENDIENTE' | 'PROGRESO' | 'FINALIZADO' | 'CANCELADO';
-export type TypeReport = 'SILENCIOSO' | 'COMPLETO';
+export type TypeReport = 'SILENCIOSO' | 'CIUDADANO' | 'SOLIDARIO';
 export type TypeEmergenci = 'BOMBEROS' | 'MEDICINA' | 'POLICIAS';
 
 export interface Report {
