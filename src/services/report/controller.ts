@@ -129,8 +129,11 @@ export const newReport = async (req: Request, res: Response) => {
       upload = { url: evidenciaBase64 };
     } else {
       const base = type === 'video' ? 'data:video/mp4;base64' : 'data:image/png;base64';
+      console.log('base ', base, type);
       upload = await cloudinary.uploader
-        .upload(`${base},${evidenciaBase64}`)
+        .upload(`${base},${evidenciaBase64}`, {
+          resource_type: type === 'video' ? 'video' : 'image',
+        })
         .catch(err => console.log('img > ', err));
     }
 
