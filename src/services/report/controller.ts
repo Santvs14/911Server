@@ -8,7 +8,7 @@ import { VerifyToken } from '../../helpers/token';
 import { format } from 'date-fns';
 import { CountPagination } from '../../helpers/numbers';
 import { getReportsStorage } from '../../sql/reports/select';
-import { Count } from '../../models/util';
+import { Count, StorageFirebase } from '../../models/util';
 import { GetRolesStorage } from '../../sql/roles/select';
 import { SelectRol } from '../../models/rol';
 import { UpdateReportStorage } from '../../sql/reports/update';
@@ -127,16 +127,17 @@ export const newReport = async (req: Request, res: Response) => {
     }
 
     if (type === 'audio') {
+      console.log('base ', String(evidenciaBase64).slice(0, 60));
       const { fileName, buffer } = GetBufferByBase64({
-        base64: `data:audio/wav;base64,${evidenciaBase64}`,
+        base64: `data:audio/mp3;base64,${evidenciaBase64}`,
         name: idReporte,
       });
       await UploadFileFirebase({
-        path: `audio/${fileName}`,
+        path: `${StorageFirebase.AUDIO}/${fileName}`,
         buffer,
       });
 
-      upload = { url: `${BASE_STORE_FIREBASE}/audio%2F${fileName}?alt=media` };
+      upload = { url: `${BASE_STORE_FIREBASE}/${StorageFirebase.AUDIO}%2F${fileName}?alt=media` };
     } else {
       const base = type === 'video' ? 'data:video/mp4;base64' : 'data:image/png;base64';
       upload = await cloudinary.uploader
