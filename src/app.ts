@@ -22,6 +22,8 @@ admin.initializeApp({
   storageBucket: config.BUCKET_URL,
 });
 
+app.locals.bucket = admin.storage().bucket();
+
 app.use(
   cors({
     origin: HOST_ADMIN,

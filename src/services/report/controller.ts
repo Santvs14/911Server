@@ -16,9 +16,9 @@ import { getUserStorage } from '../../sql/users/select';
 import { Comment } from '../../models/comment';
 import { InsertCommentStorage } from '../../sql/comment/insert';
 import { getCommentsReportStorage } from '../../sql/comment/select';
-import { PLACE_HOLDER_AVATAR } from '../../util/url';
-import { SendNotification } from '../../helpers/firebase';
-import { isAudio } from '../../helpers/string';
+import { BASE_STORE_FIREBASE, PLACE_HOLDER_AVATAR } from '../../util/url';
+import { SendNotification, UploadFileFirebase } from '../../helpers/firebase';
+import { GetBufferByBase64 } from '../../helpers/string';
 
 export const getReports = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'reports', serviceHandler: 'getReports' });
@@ -108,6 +108,7 @@ export const newReport = async (req: Request, res: Response) => {
     const tipo = req.body.tipo as TypeReport;
     const tipoEmergencia = req.body.tipoEmergencia as TypeEmergenci;
     let upload = null;
+    const idReporte = uuidv4();
 
     if (!['BOMBEROS', 'MEDICINA', 'POLICIAS'].includes(tipoEmergencia)) {
       throw Error('El tipo de emergencia no es valido');
@@ -125,11 +126,19 @@ export const newReport = async (req: Request, res: Response) => {
       if (user) idCliente = user.idCedula;
     }
 
-    if (isAudio(evidenciaBase64)) {
-      upload = { url: evidenciaBase64 };
+    if (type === 'audio') {
+      const { fileName, buffer } = GetBufferByBase64({
+        base64: `data:audio/wav;base64,${evidenciaBase64}`,
+        name: idReporte,
+      });
+      await UploadFileFirebase({
+        path: `audio/${fileName}`,
+        buffer,
+      });
+
+      upload = { url: `${BASE_STORE_FIREBASE}/audio%2F${fileName}?alt=media` };
     } else {
       const base = type === 'video' ? 'data:video/mp4;base64' : 'data:image/png;base64';
-      console.log('base ', base, type);
       upload = await cloudinary.uploader
         .upload(`${base},${evidenciaBase64}`, {
           resource_type: type === 'video' ? 'video' : 'image',
@@ -140,7 +149,7 @@ export const newReport = async (req: Request, res: Response) => {
     const getReport = (await getReportsStorage({ idCliente }, { last: true })) as Report[];
 
     const data: Report = {
-      idReporte: uuidv4(),
+      idReporte,
       naturaleza: naturaleza || null,
       sintomas: sintomas || null,
       create_at: format(new Date(), 'yyyy-MM-dd HH:mm:ss'),
