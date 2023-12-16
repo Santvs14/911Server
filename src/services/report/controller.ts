@@ -129,7 +129,7 @@ export const newReport = async (req: Request, res: Response) => {
     if (type === 'audio') {
       console.log('base ', String(evidenciaBase64).slice(0, 60));
       const { fileName, buffer } = GetBufferByBase64({
-        base64: `data:audio/mp3;base64,${evidenciaBase64}`,
+        base64: `data:audio/wav;base64,${evidenciaBase64}`,
         name: idReporte,
       });
       await UploadFileFirebase({
