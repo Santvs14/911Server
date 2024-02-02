@@ -9,6 +9,7 @@ import {
   AvatarUser,
   DeleteUser,
   UpdateUser,
+  getUser,
 } from './controller';
 import { auth } from '../../middlewares';
 import { validBodyRequest } from '../../middlewares/validBody';
@@ -18,6 +19,7 @@ const baseURL = '/users';
 
 router.get(`${baseURL}`, getUsers);
 router.get(`${baseURL}/me`, auth, getMe);
+router.get(`${baseURL}/:idCedula`, auth, getUser);
 router.post(`${baseURL}/add`, auth, validBodyRequest, addUser);
 router.post(`${baseURL}/register`, validBodyRequest, RegisterUser);
 router.post(`${baseURL}/login`, validBodyRequest, LoginUser);

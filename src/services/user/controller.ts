@@ -97,6 +97,23 @@ export const getMe = async (req: Request, res: Response) => {
   }
 };
 
+export const getUser = async (req: Request, res: Response) => {
+  req.logger = req.logger.child({ service: 'users', serviceHandler: 'getUser' });
+  req.logger.info({ status: 'start' });
+
+  try {
+    const { idCedula } = req.params;
+
+    if (!idCedula) throw Error('No se encontro el identificador del cliente');
+    const getUser = await getUserStorage({ idCedula });
+
+    return res.status(200).json({ user: getUser[0] });
+  } catch (error) {
+    req.logger.error({ status: 'error', code: 500, error: error.message });
+    return res.status(500).json({ status: error.message });
+  }
+};
+
 export const RegisterUser = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'RegisterUser' });
   req.logger.info({ status: 'start' });
