@@ -1,4 +1,5 @@
-import mime from 'mime';
+const mime = require('mime');
+
 export const isAudio = (url: string) => url.includes('.wav');
 
 export const GetBufferByBase64 = (options: { base64: string; name: string }) => {
