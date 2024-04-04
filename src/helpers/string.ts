@@ -1,25 +1,21 @@
-let mimePromise = import('mime');
-
+import mime from 'mime/dist/src/index';
 export const isAudio = (url: string) => url.includes('.wav');
 
-export const GetBufferByBase64 = async (options: { base64: string; name: string }) => {
+export const GetBufferByBase64 = (options: { base64: string; name: string }) => {
   const { base64, name } = options;
 
   const matches = base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
 
-  if (!matches || matches.length !== 3) throw new Error('Formato de base64 inválido');
+  if (matches?.length !== 3) throw Error('Format base64 invalido');
 
   const decodedImg = {
     type: matches[1],
     data: Buffer.from(matches[2], 'base64'),
   };
 
-  // Espera a que se resuelva la promesa y obtén el módulo mime
-  const mimeModule = await mimePromise;
-  const mime = mimeModule.default;
-
+  const imageBuffer = decodedImg.data;
   const extension = mime.getExtension(decodedImg.type);
   const fileName = `${name}.${extension}`;
 
-  return { fileName, buffer: decodedImg.data };
+  return { fileName, buffer: imageBuffer };
 };
