@@ -26,7 +26,7 @@
     "emergencia",
     "911"
   ],
-  "author": "GandresCoello18",
+  "author": "Santiago Vasquez",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/GandresCoello18/meniuz-back/issues"
@@ -98,5 +98,15 @@
     "*.{js,ts}": [
       "eslint"
     ]
+  },
+
+  "overrides": {
+    "@types/mime": "3.0.4"
   }
+
+
+
+
+
+
 }
