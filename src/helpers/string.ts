@@ -1,4 +1,4 @@
-import mime from 'mime/dist/src/index';
+import mime from 'mime';
 export const isAudio = (url: string) => url.includes('.wav');
 
 export const GetBufferByBase64 = (options: { base64: string; name: string }) => {
