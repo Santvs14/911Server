@@ -94,14 +94,11 @@
       "pre-commit": "lint-staged"
     }
   },
+ 
   "lint-staged": {
     "*.{js,ts}": [
       "eslint"
     ]
-  },
-
-  "overrides": {
-    "@types/mime": "3.0.4"
   }
 
 
