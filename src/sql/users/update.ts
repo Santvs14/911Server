@@ -22,19 +22,13 @@ export const UpdateUserStorage = async (options: Partial<User>) => {
     avatar,
     pin,
     v_DosPasos,
-    nombreFamiliar,
-    apellidoFamiliar,
-    parentesco,
   } = options;
   const SET: string[] = [];
 
   if (!idCedula) throw Error(`El id del usuario es requerido para actualizar`);
 
   if (nombre) SET.push(`nombre = '${nombre}'`);
-  if (nombreFamiliar) SET.push(`nombreFamiliar = '${nombreFamiliar}'`);
   if (apellido) SET.push(`apellido = '${apellido}'`);
-  if (apellidoFamiliar) SET.push(`apellidoFamiliar = '${apellidoFamiliar}'`);
-  if (parentesco) SET.push(`parentesco = '${parentesco}'`);
   if (telefono) SET.push(`telefono = '${telefono}'`);
   if (email) SET.push(`email = '${email}'`);
   if (direccion) SET.push(`direccion = '${direccion}'`);

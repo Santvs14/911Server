@@ -22,7 +22,4 @@ export interface User {
   token: string | null;
   avatar: string | null;
   nameRol?: string;
-  nombreFamiliar: string | null;
-  apellidoFamiliar: string | null;
-  parentesco: string | null;
 }

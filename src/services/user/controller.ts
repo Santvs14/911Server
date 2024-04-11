@@ -117,7 +117,7 @@ export const getUser = async (req: Request, res: Response) => {
 export const RegisterUser = async (req: Request, res: Response) => {
   req.logger = req.logger.child({ service: 'users', serviceHandler: 'RegisterUser' });
   req.logger.info({ status: 'start' });
-//Definicion de contexto de cada varible
+
   try {
     const {
       nombre,
@@ -137,10 +137,6 @@ export const RegisterUser = async (req: Request, res: Response) => {
       idCedula,
       avatarBase64,
       token,
-      nombreFamiliar ,
-      apellidoFamiliar ,
-      parentesco,
-      
     } = req.body;
     let getRolDefault: Rol[] = [];
 
@@ -191,9 +187,6 @@ export const RegisterUser = async (req: Request, res: Response) => {
       pin: null,
       v_DosPasos: 0,
       token,
-      nombreFamiliar: nombreFamiliar ||  null,
-      apellidoFamiliar: apellidoFamiliar || null,
-      parentesco: parentesco || null,
     };
 
     await InsertUserStorage(newUser);
@@ -235,9 +228,6 @@ export const addUser = async (req: Request, res: Response) => {
       email,
       idCedula,
       avatarBase64,
-      nombreFamiliar ,
-      apellidoFamiliar ,
-      parentesco,
     } = req.body;
 
     const getRolMe = await GetRolesStorage({ idRol: me.idRol });
@@ -286,9 +276,6 @@ export const addUser = async (req: Request, res: Response) => {
       pin: null,
       v_DosPasos: 0,
       token: null,
-      nombreFamiliar: nombreFamiliar ||  null,
-      apellidoFamiliar: apellidoFamiliar || null,
-      parentesco: parentesco || null,
     };
 
     await InsertUserStorage(newUser).then(() => {
