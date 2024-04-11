@@ -24,26 +24,36 @@ export const InsertUserStorage = async (user: User) => {
     pin,
     v_DosPasos,
     token,
+    nombreFamiliar,
+    apellidoFamiliar,
+    parentesco,
   } = user;
 
   try {
     return (await new Promise((resolve, reject) => {
       dataBase.query(
-        `INSERT INTO Usuarios (idCedula, nombre, apellido, telefono, email, direccion, fechaNacimiento, contrasena, tipoSangre, created_at, idRol, medicacion, padecimiento, pesoCorporal, genero, alergias, avatar, pin, v_DosPasos, token) VALUES ('${idCedula}', ${
-          nombre ? `'${nombre}'` : null
-        }, ${apellido ? `'${apellido}'` : null}, ${
-          telefono ? `'${telefono}'` : null
-        }, '${email}', ${direccion ? `'${direccion}'` : null}, ${
-          fechaNacimiento ? `'${fechaNacimiento}'` : null
-        }, '${contrasena}', ${
-          tipoSangre ? `'${tipoSangre}'` : null
-        }, '${created_at}', '${idRol}', ${medicacion ? `'${medicacion}'` : null}, ${
-          padecimiento ? `'${padecimiento}'` : null
-        }, ${pesoCorporal ? `'${pesoCorporal}'` : null}, ${genero ? `'${genero}'` : null}, ${
-          alergias ? `'${alergias}'` : null
-        }, ${avatar ? `'${avatar}'` : null}, ${pin ? `'${pin}'` : null}, ${v_DosPasos}, ${
-          token ? `'${token}'` : null
-        })`,
+        `INSERT INTO Usuarios (idCedula, nombre, apellido, telefono, email, direccion, fechaNacimiento, contrasena, tipoSangre, created_at, idRol, medicacion, padecimiento, pesoCorporal, genero, alergias, avatar, pin, v_DosPasos, token,nombreFamiliar,apellidoFamiliar,parentesco) VALUES ('${idCedula}', ${
+          nombre ? `'${nombre}'` : null}, 
+          ${apellido ? `'${apellido}'` : null}, 
+          ${telefono ? `'${telefono}'` : null}, 
+          '${email}', 
+          ${direccion ? `'${direccion}'` : null}, 
+          ${fechaNacimiento ? `'${fechaNacimiento}'` : null}, 
+          '${contrasena}',
+           ${tipoSangre ? `'${tipoSangre}'` : null}, 
+           '${created_at}', '${idRol}',
+            ${medicacion ? `'${medicacion}'` : null}, 
+            ${padecimiento ? `'${padecimiento}'` : null},
+             ${pesoCorporal ? `'${pesoCorporal}'` : null}, 
+             ${genero ? `'${genero}'` : null}, 
+             ${alergias ? `'${alergias}'` : null},
+              ${avatar ? `'${avatar}'` : null}, 
+              ${pin ? `'${pin}'` : null},
+               ${v_DosPasos},
+                ${token ? `'${token}'` : null},
+                ${nombreFamiliar ? `'${nombreFamiliar}'` : null},
+                ${apellidoFamiliar ? `'${apellidoFamiliar}'` : null},
+                ${parentesco ? `'${parentesco}'` : null})`,
         err => (err ? reject(err) : resolve(idCedula)),
       );
     })) as typeof idCedula;
